@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: smartreports
+      POSTGRES_USER: smartreports
+      POSTGRES_PASSWORD: smartreports
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartreports -d smartreports"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      APP_NAME: SmartReports
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg2://smartreports:smartreports@db:5432/smartreports
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: change-this-secret-before-selling
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      MAX_UPLOAD_MB: 25
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ""
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
+  redis_data:

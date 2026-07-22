@@ -1,0 +1,24 @@
+<svg width="620" height="112" viewBox="0 0 620 112" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SmartReports">
+  <defs>
+    <linearGradient id="logo-accent" x1="0" y1="0" x2="120" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#43E0D3"/>
+      <stop offset="1" stop-color="#169F98"/>
+    </linearGradient>
+    <linearGradient id="logo-bars" x1="38" y1="78" x2="76" y2="37" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2ED3C6"/>
+      <stop offset="1" stop-color="#D9FFFA"/>
+    </linearGradient>
+  </defs>
+  <path d="M58 10L96.1 32V76L58 98L19.9 76V32L58 10Z" fill="#07141D" stroke="url(#logo-accent)" stroke-width="5"/>
+  <path d="M35 77V64C35 62.3 36.3 61 38 61H46V77H35Z" fill="url(#logo-bars)"/>
+  <path d="M51 77V54C51 52.3 52.3 51 54 51H62V77H51Z" fill="url(#logo-bars)"/>
+  <path d="M67 77V42C67 40.3 68.3 39 70 39H78V77H67Z" fill="url(#logo-bars)"/>
+  <path d="M34 51L49 44L60 49L82 29" stroke="#F5F8FA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="34" cy="51" r="3.8" fill="#F5F8FA"/>
+  <circle cx="49" cy="44" r="3.8" fill="#F5F8FA"/>
+  <circle cx="60" cy="49" r="3.8" fill="#F5F8FA"/>
+  <circle cx="82" cy="29" r="3.8" fill="#F5F8FA"/>
+  <text x="124" y="55" fill="#F5F8FA" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="700">Smart</text>
+  <text x="248" y="55" fill="#2ED3C6" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="700">Reports</text>
+  <text x="126" y="84" fill="#2ED3C6" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="500" letter-spacing="4.5">INTELIGENCIA QUE TRANSFORMA DADOS EM DECISOES</text>
+</svg>

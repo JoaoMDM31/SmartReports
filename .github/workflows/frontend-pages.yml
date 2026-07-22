@@ -1,6 +1,11 @@
 name: Frontend GitHub Pages
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -20,13 +25,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Require public API URL
-        run: |
-          if [ -z "${{ vars.VITE_API_URL }}" ]; then
-            echo "::error::Configure VITE_API_URL in GitHub repository variables. Example: https://your-api.example.com/api"
-            exit 1
-          fi
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -43,6 +41,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_DEMO_MODE: ${{ vars.VITE_DEMO_MODE || 'true' }}
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: pnpm build
 

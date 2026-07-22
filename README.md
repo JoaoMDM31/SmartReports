@@ -17,6 +17,10 @@ SmartReports transforma planilhas Excel ou CSV em dashboards interativos e relat
 - Tema claro e escuro, layout responsivo e experiencia pensada para uso diario.
 - PostgreSQL, Redis, FastAPI, React, Docker e Docker Compose.
 
+## Link web sem servidor local
+
+O frontend tambem roda em modo demo para publicacao estatica. Em GitHub Pages, o link abre direto na tela de login e permite testar cadastro, upload, dashboards, historico, chat e PDF usando armazenamento do navegador. Para ligar no SaaS real, configure `VITE_API_URL` com a API publica e `VITE_DEMO_MODE=false`.
+
 ## Arquitetura
 
 ```mermaid

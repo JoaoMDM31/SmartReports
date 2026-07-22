@@ -1,6 +1,8 @@
 # Publicacao no GitHub e acesso pela web
 
-Este projeto tem frontend React e backend FastAPI. Para acessar o SmartReports pela web sem abrir o servidor local, voce precisa publicar duas partes:
+Este projeto tem frontend React e backend FastAPI. Para acesso imediato pela web, o frontend pode ser publicado em modo demo no GitHub Pages. Nesse modo, login, cadastro, upload, dashboards, historico, chat e PDF rodam no navegador usando `localStorage`.
+
+Para SaaS completo em producao, voce publica duas partes:
 
 1. Frontend estatico no GitHub Pages.
 2. Backend FastAPI em um host sempre ligado, como Render, Railway, Fly.io, VPS ou outro provedor Docker.
@@ -40,7 +42,9 @@ O workflow `.github/workflows/frontend-pages.yml` vai publicar o frontend automa
 https://SEU_USUARIO.github.io/SmartReports/
 ```
 
-## 3. Publicar o backend
+Por padrao, esse workflow usa `VITE_DEMO_MODE=true`. O link ja abre direto na tela de login e permite testar com qualquer e-mail e senha de 8 ou mais caracteres. Os dados ficam salvos somente no navegador de quem acessou.
+
+## 3. Publicar o backend para producao SaaS
 
 Hospede o backend usando Docker a partir da pasta `backend/`.
 
@@ -77,7 +81,14 @@ No GitHub:
 https://SUA_API_PUBLICA/api
 ```
 
-Depois rode o workflow `Frontend GitHub Pages` manualmente ou faca um novo push na branch principal.
+6. Crie outra `Repository variable` chamada `VITE_DEMO_MODE`.
+7. Valor:
+
+```text
+false
+```
+
+Depois rode o workflow `Frontend GitHub Pages` manualmente ou faca um novo push na branch principal. A partir dai, o login, upload, historico e PDF passam a usar o backend real.
 
 ## 5. Publicar imagens Docker no GitHub Container Registry
 

@@ -2,6 +2,8 @@
 
 SmartReports transforma planilhas Excel ou CSV em dashboards interativos e relatorios profissionais automaticamente. O projeto esta preparado como base comercial para SaaS multiempresa ou versao customizada.
 
+**Acessar agora:** [abrir SmartReports Web Demo](https://smartreports-joaomdm31.joao31.chatgpt.site)
+
 ## Funcionalidades
 
 - Login e cadastro com JWT.
@@ -19,7 +21,7 @@ SmartReports transforma planilhas Excel ou CSV em dashboards interativos e relat
 
 ## Link web sem servidor local
 
-O frontend tambem roda em modo demo para publicacao estatica. Em GitHub Pages, o link abre direto na tela de login e permite testar cadastro, upload, dashboards, historico, chat e PDF usando armazenamento do navegador. Para ligar no SaaS real, configure `VITE_API_URL` com a API publica e `VITE_DEMO_MODE=false`.
+O frontend tambem roda em modo demo para publicacao estatica. Acesse em [https://smartreports-joaomdm31.joao31.chatgpt.site](https://smartreports-joaomdm31.joao31.chatgpt.site). O link abre direto na tela de login e permite testar cadastro, upload, dashboards, historico, chat e PDF usando armazenamento do navegador. Para ligar no SaaS real, configure `VITE_API_URL` com a API publica e `VITE_DEMO_MODE=false`.
 
 ## Arquitetura
 

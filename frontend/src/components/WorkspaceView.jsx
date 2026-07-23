@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  BarChart3,
   CalendarClock,
   CheckCircle2,
   Clock3,
@@ -10,7 +9,6 @@ import {
   FileSpreadsheet,
   Filter,
   HelpCircle,
-  LayoutDashboard,
   Link,
   Plus,
   RotateCcw,
@@ -164,6 +162,9 @@ function DashboardHub({ reports, selectedReport, summary, onSelectReport }) {
   const filteredReports = useMemo(() => filterReportsByPeriod(reports, period), [period, reports]);
   const latestReport = filteredReports[0] || null;
   const charts = selectedReport?.analysis_summary?.charts || [];
+  const trendChart = charts[0] ? withChartTitle(charts[0], "Tendencia de Clientes") : null;
+  const regionChart = charts[1] ? withChartTitle(charts[1], "Analises por Regiao") : null;
+  const distributionChart = charts[2] ? withChartTitle(charts[2], "Distribuicao por Regiao") : null;
   const insights = buildRecentInsights(selectedReport).slice(0, 4);
   const insightsCount = buildRecentInsights(selectedReport).length;
   const totalVisualizations = summary?.total_rows_processed || selectedReport?.analysis_summary?.row_count || 0;
@@ -196,83 +197,43 @@ function DashboardHub({ reports, selectedReport, summary, onSelectReport }) {
   ];
 
   return (
-    <Page title="Dashboards" eyebrow="Central de dashboards" description="Gerencie seus dashboards, acompanhe indicadores e abra visualizacoes geradas automaticamente.">
-      <section className="dashboard-hub">
-        <div className="dashboard-filter-bar">
-          <label>
-            <span><Filter size={15} /> Periodo</span>
-            <select value={period} onChange={(event) => setPeriod(event.target.value)}>
-              <option value="all">Todo o historico</option>
-              <option value="7">Ultimos 7 dias</option>
-              <option value="30">Ultimos 30 dias</option>
-              <option value="90">Ultimos 90 dias</option>
-            </select>
-          </label>
-          <label>
-            <span><LayoutDashboard size={15} /> Dashboard ativo</span>
-            <select
-              value={selectedReport?.id || ""}
-              onChange={(event) => onSelectReport(event.target.value)}
-              disabled={!reports.length}
-            >
-              <option value="" disabled>Nenhum dashboard selecionado</option>
-              {reports.map((report) => (
-                <option key={report.id} value={report.id}>{report.title}</option>
-              ))}
-            </select>
-          </label>
-          <button className="ghost-button" type="button" onClick={() => selectedReport && onSelectReport(selectedReport.id)} disabled={!selectedReport}>
-            Atualizar
-          </button>
+    <main className="workspace-page dashboard-page">
+      <header className="page-heading dashboard-heading">
+        <div>
+          <span className="eyebrow">Central de dashboards</span>
+          <h2>Dashboards</h2>
+          <p>Gerencie seus dashboards, acompanhe indicadores e abra visualizacoes geradas automaticamente.</p>
         </div>
-
+        <label className="dashboard-period-filter">
+          <span><Filter size={15} /> Periodo</span>
+          <select value={period} onChange={(event) => setPeriod(event.target.value)}>
+            <option value="all">Todo o historico</option>
+            <option value="7">Ultimos 7 dias</option>
+            <option value="30">Ultimos 30 dias</option>
+            <option value="90">Ultimos 90 dias</option>
+          </select>
+        </label>
+      </header>
+      <section className="dashboard-hub">
         <section className="metric-grid dashboard-hub-kpis">
           {dashboardMetrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
         </section>
 
-        <section className="dashboard-recent-section">
-          <header>
-            <div>
-              <span className="eyebrow">Recentes</span>
-              <h3>Dashboards recentes</h3>
-            </div>
-            <small>{visibleRows.length} itens</small>
-          </header>
-          {visibleRows.length ? (
-            <div className="dashboard-recent-grid">
-              {visibleRows.slice(0, 4).map((report) => (
-                <article key={report.id} className={selectedReport?.id === report.id ? "active" : ""}>
-                  <span><BarChart3 size={17} /></span>
-                  <div>
-                    <strong>{report.title}</strong>
-                    <small>{formatDate(report.created_at)}</small>
-                  </div>
-                  <button className="icon-button compact" type="button" onClick={() => onSelectReport(report.id)} aria-label={`Abrir ${report.title}`}>
-                    <ArrowRight size={15} />
-                  </button>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <EmptyState title="Nenhum dashboard ainda" text="Envie uma planilha na tela Inicio para gerar seus primeiros dashboards." />
-          )}
-        </section>
-
         <section className="dashboard-chart-grid">
-          {charts[0] ? <ChartRenderer chart={charts[0]} /> : <EmptyState title="Dashboard principal vazio" text="Selecione uma planilha processada para visualizar o grafico principal." />}
-          {charts[1] ? <ChartRenderer chart={charts[1]} /> : <EmptyState title="Grafico secundario vazio" text="O SmartReports adiciona graficos conforme detecta colunas numericas, datas e categorias." />}
+          {trendChart ? <ChartRenderer chart={trendChart} /> : <EmptyState title="Tendencia de clientes" text="Selecione uma planilha processada para visualizar o grafico principal." />}
+          {regionChart ? <ChartRenderer chart={regionChart} /> : <EmptyState title="Analises por regiao" text="O SmartReports adiciona graficos conforme detecta colunas numericas, datas e categorias." />}
         </section>
 
         <section className="dashboard-management-grid">
           <div className="dashboard-complementary-chart">
-            {charts[2] ? <ChartRenderer chart={charts[2]} /> : <EmptyState title="Grafico complementar" text="Novas visualizacoes aparecem aqui quando a planilha possui dados suficientes." />}
+            {distributionChart ? <ChartRenderer chart={distributionChart} /> : <EmptyState title="Distribuicao por regiao" text="Novas visualizacoes aparecem aqui quando a planilha possui dados suficientes." />}
           </div>
 
           <section className="dashboard-table-panel">
             <header>
               <div>
-                <span className="eyebrow">Gerenciamento</span>
-                <h3>Tabela de dashboards</h3>
+                <span className="eyebrow">Recentes</span>
+                <h3>Dashboards recentes</h3>
               </div>
               <Clock3 size={17} />
             </header>
@@ -281,25 +242,27 @@ function DashboardHub({ reports, selectedReport, summary, onSelectReport }) {
                 <thead>
                   <tr>
                     <th>Nome</th>
-                    <th>Data</th>
+                    <th>Visualizacoes</th>
                     <th>Ultima atualizacao</th>
-                    <th>Status</th>
                     <th>Acao</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleRows.map((report) => (
+                  {visibleRows.slice(0, 6).map((report) => (
                     <tr key={report.id}>
                       <td>{report.title}</td>
-                      <td>{formatShortDate(report.created_at)}</td>
+                      <td>{report.row_count || report.analysis_summary?.row_count || "-"}</td>
                       <td>{formatDate(report.created_at)}</td>
-                      <td><span className="type-pill">{selectedReport?.id === report.id ? "Ativo" : "Pronto"}</span></td>
-                      <td><button className="link-button" type="button" onClick={() => onSelectReport(report.id)}>Abrir</button></td>
+                      <td>
+                        <button className="link-button dashboard-open-link" type="button" onClick={() => onSelectReport(report.id)}>
+                          Abrir <ArrowRight size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {!visibleRows.length && (
                     <tr>
-                      <td colSpan="5">Nenhum dashboard encontrado neste periodo.</td>
+                      <td colSpan="4">Nenhum dashboard encontrado neste periodo.</td>
                     </tr>
                   )}
                 </tbody>
@@ -331,7 +294,7 @@ function DashboardHub({ reports, selectedReport, summary, onSelectReport }) {
           </section>
         </section>
       </section>
-    </Page>
+    </main>
   );
 }
 
@@ -719,6 +682,10 @@ function buildRecentInsights(report) {
     ...(analyst.risks || []).map((item) => ({ ...item, kind: "R" })),
     ...(analyst.recommendations || []).map((item) => ({ ...item, kind: "A" })),
   ];
+}
+
+function withChartTitle(chart, title) {
+  return { ...chart, title };
 }
 
 function formatShortDate(value) {

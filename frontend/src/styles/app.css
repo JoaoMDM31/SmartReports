@@ -86,7 +86,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -108,7 +109,8 @@ p {
 }
 
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -721,14 +723,38 @@ input::placeholder {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "command command command command command command history history history history history history"
-    "metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics"
-    "insights insights insights insights charts charts charts charts charts copilot copilot copilot"
-    "analyst analyst analyst analyst analyst analyst columns columns columns copilot copilot copilot";
+    "command"
+    "metrics"
+    "analyst"
+    "charts"
+    "copilot";
+  gap: 24px;
+  padding: 22px 28px 34px;
+}
+
+.dashboard-analyst-flow,
+.dashboard-visual-flow {
+  display: grid;
   gap: 16px;
-  padding: 22px 28px 28px;
+  min-width: 0;
+}
+
+.dashboard-analyst-flow {
+  grid-area: analyst;
+}
+
+.dashboard-visual-flow {
+  grid-area: charts;
+}
+
+.dashboard-analyst-flow > .insights-panel,
+.dashboard-analyst-flow > .smart-analyst-panel,
+.dashboard-visual-flow > .charts-section,
+.dashboard-visual-flow > .data-panel,
+.dashboard-visual-flow > .history-panel {
+  grid-area: auto;
 }
 
 .workspace-page {
@@ -1033,19 +1059,26 @@ input::placeholder {
 .history-search {
   position: relative;
   display: block;
+  height: 42px;
+  min-height: 42px;
+  line-height: 0;
 }
 
 .history-search svg {
   position: absolute;
-  left: 12px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
+  pointer-events: none;
 }
 
 .history-search input {
-  min-height: 38px;
-  padding-left: 36px;
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding-left: 42px;
+  line-height: 1.4;
 }
 
 .history-list {
@@ -1229,6 +1262,10 @@ input::placeholder {
   gap: 10px;
 }
 
+.dashboard-analyst-flow .insight-list {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 .insight-list article {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1256,8 +1293,8 @@ input::placeholder {
 .insight-list p {
   margin-top: 6px;
   color: var(--text-secondary);
-  font-size: 0.78rem;
-  line-height: 1.5;
+  font-size: 0.84rem;
+  line-height: 1.6;
 }
 
 .insight-list small {
@@ -1286,10 +1323,14 @@ input::placeholder {
   gap: 12px;
 }
 
+.dashboard-visual-flow .charts-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
+
 .chart-panel {
   display: grid;
-  grid-template-rows: auto minmax(270px, 1fr);
-  min-height: 338px;
+  grid-template-rows: auto minmax(310px, 1fr);
+  min-height: 380px;
   padding: 14px;
   background: var(--panel-inner-bg);
 }
@@ -1310,7 +1351,7 @@ input::placeholder {
 
 .chart-canvas {
   min-width: 0;
-  min-height: 270px;
+  min-height: 310px;
 }
 
 .empty-state {
@@ -1498,14 +1539,19 @@ tr:last-child td {
 
 .copilot-panel {
   grid-area: copilot;
-  position: sticky;
-  top: 100px;
   display: grid;
-  grid-template-rows: auto auto auto minmax(220px, 1fr) auto auto;
-  gap: 12px;
-  align-self: start;
-  max-height: calc(100vh - 124px);
-  padding: 16px;
+  grid-template-rows: auto auto auto minmax(320px, auto) auto auto auto;
+  gap: 14px;
+  align-self: stretch;
+  min-height: 560px;
+  padding: 18px;
+}
+
+.copilot-header small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .assistant-intro {
@@ -1536,7 +1582,7 @@ tr:last-child td {
 .chat-suggestions button {
   min-height: 34px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--panel-inner-bg);
   color: var(--text-secondary);
   padding: 0 10px;
@@ -1547,21 +1593,29 @@ tr:last-child td {
 .chat-log {
   display: grid;
   align-content: start;
-  gap: 10px;
-  min-height: 220px;
-  overflow: auto;
+  gap: 14px;
+  min-height: 320px;
+  overflow: visible;
 }
 
 .chat-log article {
   position: relative;
+  width: fit-content;
+  max-width: min(78%, 820px);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 16px;
   background: var(--panel-inner-strong);
-  padding: 10px 12px;
+  padding: 12px 14px;
 }
 
 .chat-log article.user {
+  justify-self: end;
   background: rgba(46, 211, 198, 0.08);
+  border-color: rgba(46, 211, 198, 0.22);
+}
+
+.chat-log article.assistant {
+  justify-self: start;
 }
 
 .chat-log article.loading {
@@ -1571,10 +1625,64 @@ tr:last-child td {
   color: var(--text-secondary);
 }
 
-.chat-log p {
+.chat-empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: var(--panel-inner-bg);
+  padding: 22px;
+  text-align: center;
+}
+
+.chat-empty-state p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.message-content {
+  display: grid;
+  gap: 10px;
+}
+
+.message-content p,
+.message-content li {
   color: var(--text-primary);
   font-size: 0.88rem;
-  line-height: 1.5;
+  line-height: 1.58;
+}
+
+.message-content ul,
+.message-content ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.message-content code {
+  border-radius: 6px;
+  background: var(--input-bg);
+  padding: 2px 5px;
+  color: var(--primary);
+  font-size: 0.82rem;
+}
+
+.message-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.message-table-wrap table {
+  min-width: 420px;
+}
+
+.message-table-wrap th,
+.message-table-wrap td {
+  padding: 9px 10px;
+  font-size: 0.78rem;
 }
 
 .chat-log small {
@@ -1609,8 +1717,42 @@ tr:last-child td {
 
 .chat-input {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--input-bg);
+  padding: 8px;
+}
+
+.chat-input textarea {
+  width: 100%;
+  min-height: 40px;
+  max-height: 160px;
+  resize: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  padding: 9px 8px;
+  line-height: 1.5;
+  outline: 0;
+}
+
+.chat-input textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.chat-input .icon-button {
+  width: 40px;
+  height: 40px;
+  align-self: end;
+}
+
+.typing-status {
+  justify-self: start;
+  color: var(--text-muted);
+  font-size: 0.78rem;
 }
 
 .favorite.active {
@@ -1622,11 +1764,11 @@ tr:last-child td {
 @media (max-width: 1280px) {
   .dashboard-grid {
     grid-template-areas:
-      "command command command command command command history history history history history history"
-      "metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics metrics"
-      "insights insights insights insights insights insights charts charts charts charts charts charts"
-      "analyst analyst analyst analyst analyst analyst copilot copilot copilot copilot copilot copilot"
-      "columns columns columns columns columns columns copilot copilot copilot copilot copilot copilot";
+      "command"
+      "metrics"
+      "analyst"
+      "charts"
+      "copilot";
   }
 }
 
@@ -1674,12 +1816,9 @@ tr:last-child td {
     grid-template-columns: 1fr;
     grid-template-areas:
       "command"
-      "history"
       "metrics"
-      "insights"
-      "charts"
       "analyst"
-      "columns"
+      "charts"
       "copilot";
     padding: 16px;
   }

@@ -47,52 +47,55 @@ export default function Dashboard({
         ))}
       </section>
 
-      <InsightsPanel report={selectedReport} text={selectedReport?.insight_text} />
-
-      <SmartAnalystPanel report={selectedReport} />
-
-      <section className="charts-section">
-        <header>
-          <div>
-            <span className="eyebrow">Visualizacao</span>
-            <h2>{selectedReport?.title || "Aguardando planilha"}</h2>
-          </div>
-          <div className="chart-actions">
-            <button className="ghost-button" onClick={() => selectedReport && onSelectReport(selectedReport.id)}>
-              <RefreshCw size={16} /> Atualizar
-            </button>
-            <button
-              className="ghost-button"
-              onClick={() => selectedReport && downloadReportPdf(token, selectedReport)}
-              disabled={!selectedReport}
-            >
-              Preparar reuniao
-            </button>
-          </div>
-        </header>
-        <div className="charts-grid">
-          {(selectedReport?.analysis_summary?.charts || []).map((chart) => (
-            <ChartRenderer key={chart.id} chart={chart} />
-          ))}
-          {!selectedReport?.analysis_summary?.charts?.length && (
-            <div className="empty-state">
-              <h3>Envie uma planilha para gerar graficos interativos.</h3>
-              <p>O SmartReports identifica tipos de colunas e escolhe visualizacoes automaticamente.</p>
-            </div>
-          )}
-        </div>
+      <section className="dashboard-analyst-flow" aria-label="Smart Analyst">
+        <InsightsPanel report={selectedReport} text={selectedReport?.insight_text} />
+        <SmartAnalystPanel report={selectedReport} />
       </section>
 
-      <ColumnProfiler columns={selectedReport?.columns_schema?.columns || []} />
+      <section className="dashboard-visual-flow" aria-label="Dashboard">
+        <section className="charts-section">
+          <header>
+            <div>
+              <span className="eyebrow">Visualizacao</span>
+              <h2>{selectedReport?.title || "Aguardando planilha"}</h2>
+            </div>
+            <div className="chart-actions">
+              <button className="ghost-button" onClick={() => selectedReport && onSelectReport(selectedReport.id)}>
+                <RefreshCw size={16} /> Atualizar
+              </button>
+              <button
+                className="ghost-button"
+                onClick={() => selectedReport && downloadReportPdf(token, selectedReport)}
+                disabled={!selectedReport}
+              >
+                Preparar reuniao
+              </button>
+            </div>
+          </header>
+          <div className="charts-grid">
+            {(selectedReport?.analysis_summary?.charts || []).map((chart) => (
+              <ChartRenderer key={chart.id} chart={chart} />
+            ))}
+            {!selectedReport?.analysis_summary?.charts?.length && (
+              <div className="empty-state">
+                <h3>Envie uma planilha para gerar graficos interativos.</h3>
+                <p>O SmartReports identifica tipos de colunas e escolhe visualizacoes automaticamente.</p>
+              </div>
+            )}
+          </div>
+        </section>
 
-      <ReportHistory
-        reports={reports}
-        selectedReport={selectedReport}
-        token={token}
-        onDelete={onRemoveReport}
-        onRename={onRenameReport}
-        onSelect={onSelectReport}
-      />
+        <ColumnProfiler columns={selectedReport?.columns_schema?.columns || []} />
+
+        <ReportHistory
+          reports={reports}
+          selectedReport={selectedReport}
+          token={token}
+          onDelete={onRemoveReport}
+          onRename={onRenameReport}
+          onSelect={onSelectReport}
+        />
+      </section>
 
       <CopilotChat report={selectedReport} token={token} />
     </main>

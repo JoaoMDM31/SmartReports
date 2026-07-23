@@ -24,7 +24,6 @@ import WorkspaceView from "./WorkspaceView.jsx";
 
 const navPrimary = [
   { id: "inicio", label: "Inicio", icon: Home },
-  { id: "analises", label: "Analises", icon: Sparkles },
   { id: "dashboards", label: "Dashboards", icon: LayoutDashboard },
   { id: "relatorios", label: "Relatorios", icon: FileSpreadsheet },
   { id: "chat", label: "Chat com IA", icon: MessageSquareText },
@@ -41,7 +40,6 @@ const navSecondary = [
 
 const sectionCopy = {
   inicio: "Aqui esta o resumo das suas analises",
-  analises: "Investigue insights e estruturas detectadas",
   dashboards: "Visualize indicadores e graficos interativos",
   relatorios: "Exporte e organize relatorios profissionais",
   chat: "Converse com a IA sobre seus dados",
@@ -77,6 +75,7 @@ export default function Shell({
   const [activeSection, setActiveSection] = useState("inicio");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const currentSection = activeSection === "analises" ? "inicio" : activeSection;
   const displayUser = user?.full_name || "Usuario";
   const initials = displayUser
     .split(" ")
@@ -96,10 +95,10 @@ export default function Shell({
           {navPrimary.map((item) => (
             <button
               key={item.id}
-              className={activeSection === item.id ? "active" : ""}
+              className={currentSection === item.id ? "active" : ""}
               title={item.label}
               type="button"
-              aria-current={activeSection === item.id ? "page" : undefined}
+              aria-current={currentSection === item.id ? "page" : undefined}
               onClick={() => setActiveSection(item.id)}
             >
               <item.icon size={18} />
@@ -113,10 +112,10 @@ export default function Shell({
             {navSecondary.map((item) => (
               <button
                 key={item.id}
-                className={activeSection === item.id ? "active" : ""}
+                className={currentSection === item.id ? "active" : ""}
                 title={item.label}
                 type="button"
-                aria-current={activeSection === item.id ? "page" : undefined}
+                aria-current={currentSection === item.id ? "page" : undefined}
                 onClick={() => setActiveSection(item.id)}
               >
                 <item.icon size={18} />
@@ -141,7 +140,7 @@ export default function Shell({
         <header className="topbar">
           <div>
             <h1>Ola, {displayName}!</h1>
-            <p>{sectionCopy[activeSection] || sectionCopy.inicio}</p>
+            <p>{sectionCopy[currentSection] || sectionCopy.inicio}</p>
           </div>
           <div className="topbar-actions">
             <ThemeToggle theme={theme} onChange={onThemeChange} />
@@ -162,7 +161,7 @@ export default function Shell({
                 <div className="topbar-popover">
                   <strong>Notificacoes</strong>
                   <p>Analise pronta para revisao.</p>
-                  <button className="link-button" type="button" onClick={() => setActiveSection("analises")}>Abrir analises</button>
+                  <button className="link-button" type="button" onClick={() => setActiveSection("inicio")}>Abrir inicio</button>
                 </div>
               )}
             </div>
@@ -192,7 +191,7 @@ export default function Shell({
           </div>
         </header>
 
-        {activeSection === "inicio" ? (
+        {currentSection === "inicio" ? (
           <Dashboard
             loading={loading}
             reports={reports}
@@ -206,7 +205,7 @@ export default function Shell({
           />
         ) : (
           <WorkspaceView
-            section={activeSection}
+            section={currentSection}
             reports={reports}
             selectedReport={selectedReport}
             summary={summary}

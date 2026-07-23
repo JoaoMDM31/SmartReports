@@ -1,11 +1,16 @@
 import {
+  ArrowRight,
+  BarChart3,
   CalendarClock,
   CheckCircle2,
+  Clock3,
   Copy,
   Database,
   Download,
   FileSpreadsheet,
+  Filter,
   HelpCircle,
+  LayoutDashboard,
   Link,
   Plus,
   RotateCcw,
@@ -16,11 +21,8 @@ import {
 import { useMemo, useState } from "react";
 
 import ChartRenderer from "./ChartRenderer.jsx";
-import ColumnProfiler from "./ColumnProfiler.jsx";
 import CopilotChat from "./CopilotChat.jsx";
 import MetricCard from "./MetricCard.jsx";
-import ReportHistory from "./ReportHistory.jsx";
-import SmartAnalystPanel from "./SmartAnalystPanel.jsx";
 import UploadDropzone from "./UploadDropzone.jsx";
 import { downloadReportPdf } from "../services/api.js";
 
@@ -58,63 +60,14 @@ export default function WorkspaceView({
   onShowRegister,
   onThemeChange,
 }) {
-  const analyst = selectedReport?.analysis_summary?.analyst_report;
-  const insightsCount = analyst
-    ? (analyst.findings?.length || 0)
-      + (analyst.risks?.length || 0)
-      + (analyst.opportunities?.length || 0)
-      + (analyst.recommendations?.length || 0)
-    : 0;
-  const metrics = [
-    { label: "Analises realizadas", value: summary?.total_reports || 0, detail: "Total no historico", kind: "neutral" },
-    { label: "Relatorios gerados", value: reports.length, detail: "Disponiveis para PDF", kind: "success" },
-    { label: "Planilhas processadas", value: summary?.total_reports || 0, detail: `${summary?.total_rows_processed || 0} linhas lidas`, kind: "accent" },
-    { label: "Insights gerados", value: insightsCount || "-", detail: selectedReport ? "Da analise selecionada" : "Aguardando analise", kind: "warning" },
-  ];
-
-  if (section === "analises") {
-    return (
-      <Page title="Analises" eyebrow="Smart Analyst" description="Explore os insights, riscos, oportunidades e colunas detectadas da planilha selecionada.">
-        <div className="workspace-two-columns">
-          <ReportHistory
-            reports={reports}
-            selectedReport={selectedReport}
-            token={token}
-            onDelete={onRemoveReport}
-            onRename={onRenameReport}
-            onSelect={onSelectReport}
-          />
-          <SmartAnalystPanel report={selectedReport} />
-        </div>
-        <ColumnProfiler columns={selectedReport?.columns_schema?.columns || []} />
-      </Page>
-    );
-  }
-
   if (section === "dashboards") {
     return (
-      <Page title="Dashboards" eyebrow="Visualizacao" description="Acompanhe graficos interativos e indicadores executivos gerados automaticamente.">
-        <section className="metric-grid standalone">
-          {metrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
-        </section>
-        <section className="charts-section standalone">
-          <header>
-            <div>
-              <span className="eyebrow">Dashboard ativo</span>
-              <h2>{selectedReport?.title || "Aguardando planilha"}</h2>
-            </div>
-            <button className="ghost-button" type="button" onClick={() => selectedReport && onSelectReport(selectedReport.id)} disabled={!selectedReport}>
-              Atualizar
-            </button>
-          </header>
-          <div className="charts-grid">
-            {(selectedReport?.analysis_summary?.charts || []).map((chart) => (
-              <ChartRenderer key={chart.id} chart={chart} />
-            ))}
-            {!selectedReport?.analysis_summary?.charts?.length && <EmptyState title="Nenhum dashboard ainda" text="Envie uma planilha para gerar graficos interativos." />}
-          </div>
-        </section>
-      </Page>
+      <DashboardHub
+        reports={reports}
+        selectedReport={selectedReport}
+        summary={summary}
+        onSelectReport={onSelectReport}
+      />
     );
   }
 
@@ -128,9 +81,15 @@ export default function WorkspaceView({
 
   if (section === "chat") {
     return (
-      <Page title="Chat com IA" eyebrow="Assistente de dados" description="Converse com a IA sobre a analise selecionada e copie respostas executivas.">
-        <CopilotChat report={selectedReport} token={token} />
-      </Page>
+      <main className="chat-workspace-page">
+        <CopilotChat
+          report={selectedReport}
+          reports={reports}
+          token={token}
+          variant="page"
+          onSelectReport={onSelectReport}
+        />
+      </main>
     );
   }
 
@@ -197,6 +156,182 @@ function EmptyState({ title, text }) {
       <h3>{title}</h3>
       <p>{text}</p>
     </div>
+  );
+}
+
+function DashboardHub({ reports, selectedReport, summary, onSelectReport }) {
+  const [period, setPeriod] = useState("all");
+  const filteredReports = useMemo(() => filterReportsByPeriod(reports, period), [period, reports]);
+  const latestReport = filteredReports[0] || null;
+  const charts = selectedReport?.analysis_summary?.charts || [];
+  const insights = buildRecentInsights(selectedReport).slice(0, 4);
+  const insightsCount = buildRecentInsights(selectedReport).length;
+  const totalVisualizations = summary?.total_rows_processed || selectedReport?.analysis_summary?.row_count || 0;
+  const visibleRows = filteredReports;
+  const dashboardMetrics = [
+    {
+      label: "Dashboards ativos",
+      value: filteredReports.length,
+      detail: period === "all" ? "Todos os dashboards" : `Ultimos ${period} dias`,
+      kind: "neutral",
+    },
+    {
+      label: "Visualizacoes",
+      value: formatCompactNumber(totalVisualizations),
+      detail: "Linhas disponiveis para explorar",
+      kind: "success",
+    },
+    {
+      label: "Ultima atualizacao",
+      value: formatShortDate(latestReport?.created_at),
+      detail: latestReport?.title || "Sem dashboard ativo",
+      kind: "accent",
+    },
+    {
+      label: "Insights gerados",
+      value: insightsCount || "-",
+      detail: selectedReport ? "Na analise atual" : "Aguardando planilha",
+      kind: "warning",
+    },
+  ];
+
+  return (
+    <Page title="Dashboards" eyebrow="Central de dashboards" description="Gerencie seus dashboards, acompanhe indicadores e abra visualizacoes geradas automaticamente.">
+      <section className="dashboard-hub">
+        <div className="dashboard-filter-bar">
+          <label>
+            <span><Filter size={15} /> Periodo</span>
+            <select value={period} onChange={(event) => setPeriod(event.target.value)}>
+              <option value="all">Todo o historico</option>
+              <option value="7">Ultimos 7 dias</option>
+              <option value="30">Ultimos 30 dias</option>
+              <option value="90">Ultimos 90 dias</option>
+            </select>
+          </label>
+          <label>
+            <span><LayoutDashboard size={15} /> Dashboard ativo</span>
+            <select
+              value={selectedReport?.id || ""}
+              onChange={(event) => onSelectReport(event.target.value)}
+              disabled={!reports.length}
+            >
+              <option value="" disabled>Nenhum dashboard selecionado</option>
+              {reports.map((report) => (
+                <option key={report.id} value={report.id}>{report.title}</option>
+              ))}
+            </select>
+          </label>
+          <button className="ghost-button" type="button" onClick={() => selectedReport && onSelectReport(selectedReport.id)} disabled={!selectedReport}>
+            Atualizar
+          </button>
+        </div>
+
+        <section className="metric-grid dashboard-hub-kpis">
+          {dashboardMetrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
+        </section>
+
+        <section className="dashboard-recent-section">
+          <header>
+            <div>
+              <span className="eyebrow">Recentes</span>
+              <h3>Dashboards recentes</h3>
+            </div>
+            <small>{visibleRows.length} itens</small>
+          </header>
+          {visibleRows.length ? (
+            <div className="dashboard-recent-grid">
+              {visibleRows.slice(0, 4).map((report) => (
+                <article key={report.id} className={selectedReport?.id === report.id ? "active" : ""}>
+                  <span><BarChart3 size={17} /></span>
+                  <div>
+                    <strong>{report.title}</strong>
+                    <small>{formatDate(report.created_at)}</small>
+                  </div>
+                  <button className="icon-button compact" type="button" onClick={() => onSelectReport(report.id)} aria-label={`Abrir ${report.title}`}>
+                    <ArrowRight size={15} />
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="Nenhum dashboard ainda" text="Envie uma planilha na tela Inicio para gerar seus primeiros dashboards." />
+          )}
+        </section>
+
+        <section className="dashboard-chart-grid">
+          {charts[0] ? <ChartRenderer chart={charts[0]} /> : <EmptyState title="Dashboard principal vazio" text="Selecione uma planilha processada para visualizar o grafico principal." />}
+          {charts[1] ? <ChartRenderer chart={charts[1]} /> : <EmptyState title="Grafico secundario vazio" text="O SmartReports adiciona graficos conforme detecta colunas numericas, datas e categorias." />}
+        </section>
+
+        <section className="dashboard-management-grid">
+          <div className="dashboard-complementary-chart">
+            {charts[2] ? <ChartRenderer chart={charts[2]} /> : <EmptyState title="Grafico complementar" text="Novas visualizacoes aparecem aqui quando a planilha possui dados suficientes." />}
+          </div>
+
+          <section className="dashboard-table-panel">
+            <header>
+              <div>
+                <span className="eyebrow">Gerenciamento</span>
+                <h3>Tabela de dashboards</h3>
+              </div>
+              <Clock3 size={17} />
+            </header>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Data</th>
+                    <th>Ultima atualizacao</th>
+                    <th>Status</th>
+                    <th>Acao</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleRows.map((report) => (
+                    <tr key={report.id}>
+                      <td>{report.title}</td>
+                      <td>{formatShortDate(report.created_at)}</td>
+                      <td>{formatDate(report.created_at)}</td>
+                      <td><span className="type-pill">{selectedReport?.id === report.id ? "Ativo" : "Pronto"}</span></td>
+                      <td><button className="link-button" type="button" onClick={() => onSelectReport(report.id)}>Abrir</button></td>
+                    </tr>
+                  ))}
+                  {!visibleRows.length && (
+                    <tr>
+                      <td colSpan="5">Nenhum dashboard encontrado neste periodo.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="dashboard-insights-panel">
+            <header>
+              <div>
+                <span className="eyebrow">Smart Analyst</span>
+                <h3>Insights recentes</h3>
+              </div>
+              <Sparkles size={17} />
+            </header>
+            <div className="dashboard-insight-list">
+              {insights.length ? insights.map((insight) => (
+                <article key={`${insight.title}-${insight.detail}`}>
+                  <span>{insight.kind}</span>
+                  <div>
+                    <strong>{insight.title}</strong>
+                    <p>{insight.detail}</p>
+                  </div>
+                </article>
+              )) : (
+                <p className="muted">Selecione um dashboard para ver os principais insights da analise.</p>
+              )}
+            </div>
+          </section>
+        </section>
+      </section>
+    </Page>
   );
 }
 
@@ -565,6 +700,41 @@ function ListPanel({ emptyText, emptyTitle, items, render }) {
   }
 
   return <section className="list-panel">{items.map(render)}</section>;
+}
+
+function filterReportsByPeriod(reports, period) {
+  if (period === "all") return reports;
+  const days = Number(period);
+  if (!Number.isFinite(days)) return reports;
+  const limit = Date.now() - days * 24 * 60 * 60 * 1000;
+  return reports.filter((report) => new Date(report.created_at).getTime() >= limit);
+}
+
+function buildRecentInsights(report) {
+  const analyst = report?.analysis_summary?.analyst_report;
+  if (!analyst) return [];
+  return [
+    ...(analyst.findings || []).map((item) => ({ ...item, kind: "F" })),
+    ...(analyst.opportunities || []).map((item) => ({ ...item, kind: "O" })),
+    ...(analyst.risks || []).map((item) => ({ ...item, kind: "R" })),
+    ...(analyst.recommendations || []).map((item) => ({ ...item, kind: "A" })),
+  ];
+}
+
+function formatShortDate(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatCompactNumber(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "-";
+  if (Math.abs(number) >= 1_000_000) return `${Math.round(number / 100_000) / 10}M`;
+  if (Math.abs(number) >= 1_000) return `${Math.round(number / 100) / 10}k`;
+  return String(number);
 }
 
 function formatDate(value) {

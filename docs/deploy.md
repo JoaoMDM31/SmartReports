@@ -27,7 +27,7 @@ Servicos:
 - `ALLOWED_ORIGINS`: dominios liberados no CORS.
 - `MAX_UPLOAD_MB`: limite de upload por arquivo.
 - `OPENAI_API_KEY`: chave da OpenAI usada apenas pelo backend para o Chat com IA real.
-- `OPENAI_MODEL`: modelo usado pelo SmartReports AI. O padrao do projeto e `gpt-5.6`.
+- `OPENAI_MODEL`: modelo usado pelo SmartReports AI. O padrao do projeto e `gpt-5.6-sol`.
 - `OPENAI_REASONING_EFFORT`: esforco de raciocinio quando o modelo suportar. Comece com `low` e teste `medium` para analises mais profundas.
 - `VITE_API_URL`: URL publica da API usada pelo frontend.
 

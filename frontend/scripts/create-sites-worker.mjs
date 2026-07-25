@@ -89,7 +89,7 @@ async function handleAiChat(request, env) {
 }
 
 async function callOpenAi(env, question, context) {
-  const model = env.OPENAI_MODEL || "gpt-5.6";
+  const model = env.OPENAI_MODEL || "gpt-5.6-sol";
   const baseUrl = String(env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\\/$/, "");
   const maxOutputTokens = Number(env.OPENAI_MAX_OUTPUT_TOKENS || 1200);
   const userPrompt = "Pergunta do usuario:\\n" + question + "\\n\\nContexto JSON do relatorio:\\n" + context + "\\n\\nAnalise os dados como consultor de negocios. Use evidencias e recomende proximos passos praticos.";

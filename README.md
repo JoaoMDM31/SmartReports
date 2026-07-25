@@ -31,7 +31,7 @@ No arquivo `.env`, configure:
 
 ```env
 OPENAI_API_KEY=sk-proj-sua-chave
-OPENAI_MODEL=gpt-5.6
+OPENAI_MODEL=gpt-5.6-sol
 OPENAI_REASONING_EFFORT=low
 ```
 

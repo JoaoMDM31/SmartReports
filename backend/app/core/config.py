@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     gzip_minimum_size: int = 1000
     allowed_upload_extensions: list[str] = [".xlsx", ".xlsm", ".xls", ".csv"]
     openai_api_key: str | None = None
-    openai_model: str = "gpt-5.6"
+    openai_model: str = "gpt-5.6-sol"
     openai_base_url: str = "https://api.openai.com/v1"
     openai_request_timeout_seconds: int = 30
     openai_max_context_chars: int = 12000

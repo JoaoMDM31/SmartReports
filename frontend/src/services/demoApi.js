@@ -160,6 +160,12 @@ export async function demoChatWithReport(token, id, question) {
   await pause(260);
   const user = getUserFromToken(token);
   const report = getOwnedReport(user.id, id);
+
+  const hostedAiAnswer = await requestHostedAiAnswer(report, question);
+  if (hostedAiAnswer) {
+    return hostedAiAnswer;
+  }
+
   const answer = buildAnswer(report, question);
   return {
     answer: answer.text,
@@ -167,6 +173,123 @@ export async function demoChatWithReport(token, id, question) {
     evidence: answer.evidence,
     next_steps: answer.nextSteps,
   };
+}
+
+async function requestHostedAiAnswer(report, question) {
+  if (typeof window === "undefined" || typeof fetch !== "function") {
+    return null;
+  }
+
+  try {
+    const response = await fetch("/api/demo-ai-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question,
+        report: buildHostedAiContext(report),
+      }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    if (!payload?.answer) {
+      return null;
+    }
+
+    return {
+      answer: String(payload.answer),
+      confidence: payload.confidence || "media",
+      evidence: Array.isArray(payload.evidence) ? payload.evidence : [],
+      next_steps: Array.isArray(payload.next_steps) ? payload.next_steps : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildHostedAiContext(report) {
+  const analysis = report.analysis_summary || {};
+  const analyst = analysis.analyst_report || {};
+  const schema = report.columns_schema || {};
+
+  return {
+    report: {
+      id: report.id,
+      title: report.title,
+      filename: report.filename,
+      source_sheet: report.source_sheet,
+      created_at: report.created_at,
+    },
+    schema: {
+      row_count: schema.row_count,
+      column_count: schema.column_count,
+      types: schema.types,
+      columns: (schema.columns || []).slice(0, 14).map((column) => ({
+        name: column.name,
+        type: column.type,
+        missing_count: column.missing_count,
+        missing_ratio: column.missing_ratio,
+        unique_count: column.unique_count,
+        sample_values: (column.sample_values || []).slice(0, 4),
+        stats: column.stats,
+        top_values: (column.top_values || []).slice(0, 6),
+      })),
+    },
+    summary: {
+      row_count: analysis.row_count,
+      column_count: analysis.column_count,
+      missing_cells: analysis.missing_cells,
+      quality_score: analysis.quality_score,
+      summary_cards: (analysis.summary_cards || []).slice(0, 10),
+    },
+    charts: summarizeChartsForAi(analysis.charts || []),
+    smart_analyst: {
+      mode: analyst.mode,
+      confidence_score: analyst.confidence_score,
+      executive_summary: analyst.executive_summary,
+      kpis: (analyst.kpis || []).slice(0, 8),
+      findings: (analyst.findings || []).slice(0, 8),
+      risks: (analyst.risks || []).slice(0, 8),
+      opportunities: (analyst.opportunities || []).slice(0, 8),
+      recommendations: (analyst.recommendations || []).slice(0, 8),
+      action_plan: (analyst.action_plan || []).slice(0, 8),
+      segment_analysis: (analyst.segment_analysis || []).slice(0, 8),
+      conclusion: analyst.conclusion,
+    },
+    insight_text: report.insight_text,
+  };
+}
+
+function summarizeChartsForAi(charts) {
+  return charts.slice(0, 8).map((chart) => {
+    const summarized = {
+      id: chart.id,
+      type: chart.type,
+      title: chart.title,
+      xLabel: chart.xLabel,
+      yLabel: chart.yLabel,
+    };
+
+    if (chart.x && chart.y) {
+      summarized.x = headTail(chart.x, 6);
+      summarized.y = headTail(chart.y, 6);
+    }
+    if (chart.labels && chart.values) {
+      summarized.labels = chart.labels.slice(0, 10);
+      summarized.values = chart.values.slice(0, 10);
+    }
+
+    return summarized;
+  });
+}
+
+function headTail(items, size) {
+  if (!Array.isArray(items)) return [];
+  if (items.length <= size * 2) return items;
+  return [...items.slice(0, size), { gap: items.length - size * 2 }, ...items.slice(-size)];
 }
 
 export async function demoDownloadReportPdf(token, report) {

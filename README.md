@@ -37,6 +37,8 @@ OPENAI_REASONING_EFFORT=low
 
 Sem `OPENAI_API_KEY`, o sistema continua funcionando com o Smart Analyst local como fallback. Para reduzir custo em alto volume, troque `OPENAI_MODEL` para um modelo mais economico disponivel na sua conta.
 
+No link publicado pelo Sites, o frontend demo tambem tenta chamar `/api/demo-ai-chat` no proprio dominio. Configure `OPENAI_API_KEY` como variavel secreta do Sites para ativar IA real sem expor a chave no navegador.
+
 ## Arquitetura
 
 ```mermaid

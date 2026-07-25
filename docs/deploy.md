@@ -31,6 +31,8 @@ Servicos:
 - `OPENAI_REASONING_EFFORT`: esforco de raciocinio quando o modelo suportar. Comece com `low` e teste `medium` para analises mais profundas.
 - `VITE_API_URL`: URL publica da API usada pelo frontend.
 
+No deploy pelo Sites, configure `OPENAI_API_KEY` como segredo de runtime do projeto. O frontend demo chama `/api/demo-ai-chat` no mesmo dominio e o Worker do Sites faz a chamada server-side para a OpenAI.
+
 ## Producao SaaS
 
 Recomendado:

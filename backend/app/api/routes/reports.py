@@ -19,7 +19,7 @@ from app.schemas.report import (
     ReportListItem,
     ReportUpdate,
 )
-from app.services.analyst import answer_report_question
+from app.services.ai_chat import answer_report_question_with_ai
 from app.services.pdf_service import generate_report_pdf
 from app.services.spreadsheet_analyzer import analyze_spreadsheet
 
@@ -121,7 +121,7 @@ def chat_with_report(
     db: Session = Depends(get_db),
 ) -> dict:
     report = _get_owned_report(report_id, current_user, db)
-    return answer_report_question(payload.question, report)
+    return answer_report_question_with_ai(payload.question, report)
 
 
 @router.get("/{report_id}/pdf")

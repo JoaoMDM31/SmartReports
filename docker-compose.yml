@@ -34,6 +34,13 @@ services:
       JWT_SECRET_KEY: change-this-secret-before-selling
       ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
       MAX_UPLOAD_MB: 25
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.6}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_REQUEST_TIMEOUT_SECONDS: ${OPENAI_REQUEST_TIMEOUT_SECONDS:-30}
+      OPENAI_MAX_CONTEXT_CHARS: ${OPENAI_MAX_CONTEXT_CHARS:-12000}
+      OPENAI_MAX_OUTPUT_TOKENS: ${OPENAI_MAX_OUTPUT_TOKENS:-1200}
+      OPENAI_REASONING_EFFORT: ${OPENAI_REASONING_EFFORT:-low}
     depends_on:
       db:
         condition: service_healthy

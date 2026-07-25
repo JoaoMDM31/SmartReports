@@ -20,6 +20,7 @@ flowchart TB
     Analyzer["Analyzer Service"]
     Insight["Smart Analyst Engine"]
     Chat["Copilot Chat"]
+    OpenAI["OpenAI API Adapter"]
     PDF["PDF Service"]
   end
 
@@ -38,6 +39,7 @@ flowchart TB
   Routes --> Analyzer
   Routes --> Chat
   Routes --> PDF
+  Chat --> OpenAI
   Analyzer --> Insight
   Analyzer --> Redis
   Routes --> Postgres
@@ -56,7 +58,8 @@ flowchart TB
 - `app/schemas`: contratos Pydantic.
 - `app/api/routes`: endpoints de autenticacao, relatorios, dashboard e saude.
 - `app/services/spreadsheet_analyzer.py`: leitura de arquivos, inferencia de tipos, KPIs, graficos e insights.
-- `app/services/analyst.py`: raciocinio analitico do Smart Analyst e chat contextual.
+- `app/services/analyst.py`: raciocinio analitico local do Smart Analyst e fallback contextual.
+- `app/services/ai_chat.py`: integra o Chat com IA a OpenAI API usando contexto compacto do relatorio.
 - `app/services/pdf_service.py`: geracao do PDF executivo.
 
 ## Frontend
@@ -100,6 +103,6 @@ erDiagram
 
 - A primeira tela apos login ja e o ambiente operacional, com upload e leitura dos resultados.
 - A analise e automatica, mas os objetos retornados sao estruturados para permitir edicao futura de graficos e templates.
-- O Smart Analyst e deterministico nesta versao, para entregar consistencia sem depender de credenciais externas de IA.
+- O Chat com IA usa OpenAI API quando `OPENAI_API_KEY` esta configurada e cai para o Smart Analyst local quando a chave estiver ausente ou a API estiver indisponivel.
 - O cache Redis usa hash do arquivo para evitar reprocessamento de planilhas repetidas.
 - O SQLite local reduz atrito no desenvolvimento, enquanto o Docker Compose entrega PostgreSQL para a pilha comercial.

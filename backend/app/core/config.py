@@ -1,8 +1,13 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -26,8 +31,19 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     gzip_minimum_size: int = 1000
     allowed_upload_extensions: list[str] = [".xlsx", ".xlsm", ".xls", ".csv"]
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-5.6"
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_request_timeout_seconds: int = 30
+    openai_max_context_chars: int = 12000
+    openai_max_output_tokens: int = 1200
+    openai_reasoning_effort: str | None = "low"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

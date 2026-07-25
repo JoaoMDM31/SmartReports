@@ -12,7 +12,7 @@ SmartReports transforma planilhas Excel ou CSV em dashboards interativos e relat
 - KPIs, graficos Plotly e perfil de qualidade dos dados.
 - Resumo automatico e insights de negocio gerados a partir da planilha.
 - Smart Analyst com resumo executivo, descobertas, riscos, oportunidades, recomendacoes e plano de acao.
-- Copilot IA contextual para perguntar sobre o relatorio em linguagem natural.
+- Copilot IA contextual para perguntar sobre o relatorio em linguagem natural, com integracao OpenAI API no backend.
 - Logs estruturados, request id, compressao HTTP e rate limiting basico.
 - Historico de relatorios por usuario.
 - Exportacao de PDF profissional com ReportLab.
@@ -22,6 +22,20 @@ SmartReports transforma planilhas Excel ou CSV em dashboards interativos e relat
 ## Link web sem servidor local
 
 O frontend tambem roda em modo demo para publicacao estatica. Acesse em [https://smartreports-joaomdm31.joao31.chatgpt.site](https://smartreports-joaomdm31.joao31.chatgpt.site). O link abre direto na tela de login e permite testar cadastro, upload, dashboards, historico, chat e PDF usando armazenamento do navegador. Para ligar no SaaS real, configure `VITE_API_URL` com a API publica e `VITE_DEMO_MODE=false`.
+
+## IA real com OpenAI API
+
+O chat com IA chama a OpenAI pelo backend FastAPI. A chave nunca deve ficar no React.
+
+No arquivo `.env`, configure:
+
+```env
+OPENAI_API_KEY=sk-proj-sua-chave
+OPENAI_MODEL=gpt-5.6
+OPENAI_REASONING_EFFORT=low
+```
+
+Sem `OPENAI_API_KEY`, o sistema continua funcionando com o Smart Analyst local como fallback. Para reduzir custo em alto volume, troque `OPENAI_MODEL` para um modelo mais economico disponivel na sua conta.
 
 ## Arquitetura
 
@@ -33,6 +47,7 @@ flowchart LR
   API --> Analyzer["Spreadsheet Analyzer"]
   API --> PDF["ReportLab PDF"]
   Analyzer --> Cache["Redis Cache"]
+  API --> OpenAI["OpenAI API"]
   API --> DB["PostgreSQL"]
   Analyzer --> Plotly["Plotly Specs"]
   PDF --> User

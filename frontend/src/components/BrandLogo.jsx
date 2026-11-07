@@ -1,6 +1,9 @@
+// BASE_URL is "/" at the domain root and "/SmartReports/" on GitHub Pages (always ends with "/").
+const BASE_URL = import.meta.env.BASE_URL;
+
 export const BRAND_ASSETS = {
-  horizontal: "/assets/brand/smartreports-logo-horizontal.svg",
-  icon: "/assets/brand/smartreports-icon.svg",
+  horizontal: `${BASE_URL}assets/brand/smartreports-logo-horizontal.svg`,
+  icon: `${BASE_URL}assets/brand/smartreports-icon.svg`,
 };
 
 export default function BrandLogo({ variant = "horizontal", compact = false }) {

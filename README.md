@@ -106,6 +106,15 @@ cd backend
 pytest
 ```
 
+### Integração contínua
+
+O workflow `CI` (GitHub Actions) roda a cada push e pull request:
+
+- **Backend:** Python 3.12, instalação de `backend/requirements.txt` e `pytest backend/tests`.
+- **Frontend:** Node.js 22 e pnpm na versão fixada em `frontend/package.json` (`packageManager`), com `pnpm install --frozen-lockfile` e `pnpm build`.
+
+O pnpm é instalado pela action `pnpm/action-setup`, sem depender do Corepack embutido no Node.js.
+
 ## Endpoints principais
 
 - `POST /api/auth/register`
